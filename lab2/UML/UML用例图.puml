@@ -13,36 +13,28 @@ rectangle "账户与权限" {
   usecase "管理个人账户" as UC02
 }
 
-rectangle "商品生命周期" {
-  usecase "发布商品" as UC03
-  usecase "提交审核" as UC04
-  usecase "修改商品" as UC05
-  usecase "下架商品" as UC06
+rectangle "商品管理" {
+  usecase "发布 / 修改 / 送审" as UC03
+  usecase "下架 / 重新上架" as UC04
 }
 
 rectangle "查询与展示" {
-  usecase "查询商品" as UC07
-  usecase "查看商品详情" as UC08
+  usecase "查询与查看商品" as UC05
 }
 
 rectangle "预约与交易" {
-  usecase "预约商品" as UC09
-  usecase "加入候补" as UC10
-  usecase "取消预约" as UC11
-  usecase "卖家确认 / 拒绝预约" as UC12
-  usecase "双方确认成交" as UC13
+  usecase "预约商品" as UC06
+  usecase "加入候补" as UC07
+  usecase "取消预约" as UC08
+  usecase "确认预约与成交" as UC09
 }
 
 rectangle "平台管理" {
-  usecase "查看全部商品" as UC22
-  usecase "审核商品" as UC14
-  usecase "删除 / 下架违规商品" as UC15
-  usecase "冻结 / 封禁账户" as UC16
-  usecase "处理投诉" as UC17
-  usecase "处理申诉" as UC18
-  usecase "查看分类统计" as UC19
-  usecase "查询操作日志" as UC20
-  usecase "创建管理员" as UC21
+  usecase "查看 / 审核 / 处置商品" as UC10
+  usecase "处置账户" as UC11
+  usecase "处理投诉 / 申诉" as UC12
+  usecase "统计与日志" as UC13
+  usecase "创建管理员" as UC14
 }
 
 ' 普通用户
@@ -55,28 +47,19 @@ User --> UC06
 User --> UC07
 User --> UC08
 User --> UC09
-User --> UC10
-User --> UC11
-User --> UC12
-User --> UC13
 
 ' 管理员
-Admin --> UC22
-Admin --> UC14
-Admin --> UC15
-Admin --> UC16
-Admin --> UC17
-Admin --> UC18
-Admin --> UC19
-Admin --> UC20
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+Admin --> UC13
 
 ' 初始管理员继承普通管理员权限，并独有创建管理员权限
 InitialAdmin --|> Admin
-InitialAdmin --> UC21
+InitialAdmin --> UC14
 
 ' 用例关系
-UC10 .> UC09 : <<extend>>
-UC18 .> UC17 : <<extend>>
+UC07 .> UC06 : <<extend>>
 
 note right of User
   同一普通账户可同时作为买家和卖家，

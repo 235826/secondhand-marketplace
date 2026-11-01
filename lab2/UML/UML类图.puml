@@ -4,8 +4,8 @@ skinparam dpi 150
 skinparam classAttributeIconSize 0
 skinparam nodesep 15
 skinparam ranksep 20
-skinparam classFontSize 16
-skinparam classAttributeFontSize 12
+skinparam classFontSize 22
+skinparam classAttributeFontSize 15
 left to right direction
 hide circle
 title 南京大学校园二手交易系统 - 类图
