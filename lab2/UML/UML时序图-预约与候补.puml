@@ -1,0 +1,65 @@
+@startuml UML时序图-预约与候补
+skinparam defaultFontName "PingFang SC"
+skinparam dpi 150
+title 南京大学校园二手交易系统 - 预约、候补与成交确认时序图
+
+actor "买家" as Buyer
+actor "卖家" as Seller
+participant "预约服务\nReservationService" as RS
+participant "商品服务\nProductService" as PS
+participant "交易服务\nTransactionService" as TS
+database "数据库" as DB
+
+== 阶段一：预约与候补 ==
+
+Buyer -> RS : 提交预约(productId, pageVersion)
+RS -> PS : 校验商品状态、价格版本与可预约条件
+PS --> RS : 可预约 / 已变更 / 已被锁定
+
+alt 页面版本过期或商品状态已变更
+  RS --> Buyer : 拒绝预约，提示刷新页面
+else 商品可预约且未被锁定
+  RS -> DB : INSERT Reservation(status = LOCKED)
+  RS -> DB : UPDATE Product SET status = RESERVED
+  DB --> RS : 事务提交成功
+  RS --> Buyer : 预约成功，获得唯一锁定
+else 商品已被其他买家锁定
+  RS --> Buyer : 预约失败，询问是否加入候补
+  opt 买家明确选择加入候补
+    Buyer -> RS : 确认加入候补
+    RS -> DB : INSERT Waitlist(status = WAITING)
+    DB --> RS : 保存成功
+    RS --> Buyer : 候补加入成功
+  end
+end
+
+note over RS, DB
+  预约记录创建与商品状态更新在同一事务内完成；
+  唯一约束保证同一商品同一时刻最多一条有效锁定。
+end note
+
+== 阶段二：卖家确认与双方成交 ==
+
+Seller -> RS : 确认预约
+RS -> DB : UPDATE Reservation SET status = SELLER_CONFIRMED
+DB --> RS : 更新成功
+RS --> Seller : 确认成功（不等于成交）
+
+Buyer -> TS : 确认成交
+TS -> DB : 校验预约未取消且卖家已确认
+TS -> DB : 记录买家确认
+
+Seller -> TS : 确认成交
+TS -> DB : 校验双方均已确认
+TS -> DB : INSERT Transaction
+TS -> DB : UPDATE Product SET status = SOLD
+DB --> TS : 事务提交成功
+TS --> Buyer : 成交完成
+TS --> Seller : 成交完成
+
+note over TS, DB
+  重复确认按幂等处理，不重复生成成交记录；
+  任一方在成交前取消预约，则已有确认失效。
+end note
+
+@enduml

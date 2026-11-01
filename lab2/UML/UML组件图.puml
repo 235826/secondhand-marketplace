@@ -1,0 +1,86 @@
+@startuml UML组件图
+skinparam defaultFontName "PingFang SC"
+skinparam dpi 150
+skinparam componentStyle rectangle
+title 南京大学校园二手交易系统 - 组件图
+
+package "表现层" {
+  component "Web 前端\nWebUI" as WebUI
+}
+
+package "应用服务层" {
+  component "账户服务\nAccountService" as AccountService
+  component "商品服务\nProductService" as ProductService
+  component "查询服务\nSearchService" as SearchService
+  component "预约服务\nReservationService" as ReservationService
+  component "交易服务\nTransactionService" as TransactionService
+  component "投诉服务\nComplaintService" as ComplaintService
+  component "统计日志服务\nAnalyticsLogService" as AnalyticsLogService
+}
+
+package "领域层" {
+  component "账户与权限模型\nAccountDomain" as AccountDomain
+  component "商品与审核模型\nProductDomain" as ProductDomain
+  component "预约与候补模型\nReservationDomain" as ReservationDomain
+  component "交易模型\nTransactionDomain" as TransactionDomain
+  component "投诉申诉模型\nComplaintDomain" as ComplaintDomain
+}
+
+package "数据访问层" {
+  component "仓储接口\nRepository" as Repository
+  database "关系型数据库\nMySQL" as DB
+}
+
+component "学校邮箱验证服务\nEmailService" as EmailService
+component "文件存储服务\nFileService" as FileService
+
+' 表现层调用应用服务
+WebUI --> AccountService
+WebUI --> ProductService
+WebUI --> SearchService
+WebUI --> ReservationService
+WebUI --> TransactionService
+WebUI --> ComplaintService
+WebUI --> AnalyticsLogService
+
+' 应用服务依赖领域模型和仓储
+AccountService --> AccountDomain
+AccountService --> Repository
+AccountService --> EmailService
+
+ProductService --> ProductDomain
+ProductService --> Repository
+ProductService --> FileService
+
+SearchService --> ProductDomain
+SearchService --> Repository
+
+ReservationService --> ReservationDomain
+ReservationService --> ProductDomain
+ReservationService --> Repository
+
+TransactionService --> TransactionDomain
+TransactionService --> ReservationDomain
+TransactionService --> ProductDomain
+TransactionService --> Repository
+
+ComplaintService --> ComplaintDomain
+ComplaintService --> AccountDomain
+ComplaintService --> Repository
+
+AnalyticsLogService --> Repository
+
+' 数据访问层
+Repository --> DB
+
+note right of WebUI
+  表现层只负责展示、输入校验和权限入口，
+  不直接访问数据库。
+end note
+
+note bottom of Repository
+  应用服务通过仓储接口访问数据库，
+  领域层不依赖具体存储实现。
+end note
+
+@enduml

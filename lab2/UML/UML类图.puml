@@ -1,0 +1,191 @@
+@startuml UML类图
+skinparam defaultFontName "PingFang SC"
+skinparam dpi 150
+skinparam classAttributeIconSize 0
+skinparam nodesep 15
+skinparam ranksep 20
+skinparam classFontSize 16
+skinparam classAttributeFontSize 12
+left to right direction
+hide circle
+title 南京大学校园二手交易系统 - 类图
+
+package "账户与权限" {
+  class User as "用户 User" {
+    - userId: Long
+    - email: String
+    - passwordHash: String
+    - role: RoleType
+    - status: AccountStatus
+    + register(): void
+    + login(): Session
+    + isActive(): boolean
+  }
+
+  class Admin as "管理员 Admin" {
+    + reviewProduct(version: ProductVersion): ReviewRecord
+    + handleComplaint(complaint: Complaint): void
+    + freezeAccount(user: User): void
+  }
+
+  class InitialAdmin as "初始管理员 InitialAdmin" {
+    + createAdmin(email: String): Admin
+  }
+}
+
+package "商品与审核" {
+  class Product as "商品 Product" {
+    - productId: Long
+    - title: String
+    - price: BigDecimal
+    - condition: String
+    - location: String
+    - note: String
+    - status: ProductStatus
+    + submitForReview(): void
+    + publish(): void
+    + takeOffline(): void
+    + markSold(): void
+  }
+
+  class ProductVersion as "商品版本 ProductVersion" {
+    - versionId: Long
+    - versionNo: int
+    - snapshot: String
+    - submittedAt: DateTime
+  }
+
+  class ReviewRecord as "审核记录 ReviewRecord" {
+    - reviewId: Long
+    - conclusion: ReviewConclusion
+    - opinion: String
+    - reviewedAt: DateTime
+  }
+
+  class Category as "商品分类 Category" {
+    - categoryId: Long
+    - name: String
+  }
+}
+
+package "预约与交易" {
+  class Reservation as "预约 Reservation" {
+    - reservationId: Long
+    - status: ReservationStatus
+    - createdAt: DateTime
+    - sellerConfirmedAt: DateTime
+    - buyerConfirmedAt: DateTime
+    + lock(product: Product): boolean
+    + cancel(actor: User): void
+    + confirmBySeller(): void
+    + confirmByBuyer(): void
+    + isBothConfirmed(): boolean
+  }
+
+  class Waitlist as "候补 Waitlist" {
+    - waitlistId: Long
+    - joinedAt: DateTime
+    - status: WaitlistStatus
+    + join(): void
+    + withdraw(): void
+  }
+
+  class Transaction as "成交记录 Transaction" {
+    - transactionId: Long
+    - completedAt: DateTime
+    + complete(): void
+  }
+}
+
+package "投诉与审计" {
+  class Complaint as "投诉 Complaint" {
+    - complaintId: Long
+    - reason: String
+    - status: ComplaintStatus
+    - createdAt: DateTime
+    + handle(result: String): void
+  }
+
+  class Appeal as "申诉 Appeal" {
+    - appealId: Long
+    - content: String
+    - status: AppealStatus
+    - submittedAt: DateTime
+    + submit(): void
+  }
+
+  class OperationLog as "操作日志 OperationLog" {
+    - logId: Long
+    - action: String
+    - targetType: String
+    - targetId: Long
+    - beforeState: String
+    - afterState: String
+    - result: String
+    - createdAt: DateTime
+  }
+}
+
+' 继承与角色
+User <|-- Admin
+Admin <|-- InitialAdmin
+
+' 账户、商品与审核
+User "1" -- "0..*" Product : 发布 >
+User "1" -- "0..*" Reservation : 预约 >
+User "1" -- "0..*" Waitlist : 候补 >
+Category "1" -- "0..*" Product : 分类 >
+Product "1" -- "0..*" ProductVersion : 版本 >
+ProductVersion "1" -- "0..*" ReviewRecord : 审核 >
+Admin "1" -- "0..*" ReviewRecord : 审核 >
+
+' 预约、候补与成交
+Product "1" -- "0..*" Reservation : 被预约 >
+Product "1" -- "0..*" Waitlist : 候补 >
+Reservation "0..1" -- "1" Transaction : 生成 >
+Product "1" -- "0..*" Transaction : 成交 >
+Transaction "1" -- "1" User : 买家 >
+Transaction "1" -- "1" User : 卖家 >
+
+' 投诉、申诉与审计
+User "1" -- "0..*" Complaint : 发起 >
+Product "0..1" -- "0..*" Complaint : 涉及 >
+Admin "1" -- "0..*" Complaint : 处置 >
+Complaint "1" -- "0..*" Appeal : 申诉 >
+User "1" -- "0..*" Appeal : 提交 >
+User "1" -- "0..*" OperationLog : 操作 >
+
+note right of User
+  RoleType: USER / ADMIN / INITIAL_ADMIN
+  AccountStatus: ACTIVE / FROZEN / BANNED
+end note
+
+note right of Product
+  ProductStatus: DRAFT / PENDING_REVIEW / REJECTED /
+  PUBLISHED / RESERVED / OFFLINE / SOLD / VIOLATION_BANNED
+  已成交不可撤销，成交后自动停止在售。
+end note
+
+note right of Reservation
+  唯一约束：同一商品同一时刻最多 1 条有效正式预约
+  （LOCKED / SELLER_CONFIRMED）；候补不占用锁定。
+  ReservationStatus: LOCKED / SELLER_CONFIRMED /
+  CANCELLED / COMPLETED / TERMINATED
+end note
+
+note right of Waitlist
+  WaitlistStatus: WAITING / PROMOTED / CANCELLED / TERMINATED
+  候补由买家主动选择加入，不自动转正。
+end note
+
+note right of Admin
+  管理员不得直接编辑已发布商品正文，
+  只能执行审核、下架、封禁、删除等处置。
+end note
+
+note bottom of Complaint
+  ComplaintStatus: PENDING / PROCESSING / RESOLVED / REJECTED
+  AppealStatus: SUBMITTED / APPROVED / REJECTED
+end note
+
+@enduml

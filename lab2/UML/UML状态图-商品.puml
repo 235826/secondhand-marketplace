@@ -1,0 +1,59 @@
+@startuml UML状态图-商品
+skinparam defaultFontName "PingFang SC"
+skinparam dpi 150
+title 南京大学校园二手交易系统 - 商品状态图
+
+state "草稿\nDRAFT" as Draft
+state "待审核\nPENDING_REVIEW" as Pending
+state "审核驳回\nREJECTED" as Rejected
+state "已发布\nPUBLISHED" as Published
+state "已预约\nRESERVED" as Reserved
+state "已下架\nOFFLINE" as Offline
+state "已成交\nSOLD" as Sold
+state "违规封禁\nVIOLATION_BANNED" as Banned
+
+[*] --> Draft
+
+Draft --> Pending : 提交审核\n[信息完整且价格合法]
+Pending --> Published : 审核通过
+Pending --> Rejected : 审核驳回\n[填写驳回意见]
+Rejected --> Pending : 修改后重新提交
+
+Published --> Reserved : 预约成功\n[取得唯一锁定]
+Reserved --> Published : 取消 / 拒绝预约\n[释放锁定且商品可售]
+
+Published --> Offline : 卖家下架
+Reserved --> Offline : 卖家下架\n[终止预约与候补]
+Offline --> Pending : 重新上架申请
+
+Published --> Pending : 修改商品\n[进入重审，暂停成交]
+Reserved --> Pending : 修改商品\n[保留预约但暂停成交]
+
+Reserved --> Sold : 双方确认成交
+Published --> Banned : 管理员违规处置
+Reserved --> Banned : 管理员违规处置
+Offline --> Banned : 管理员违规处置
+Banned --> Pending : 解除处罚后重新提交
+
+Sold --> [*]
+
+note right of Pending
+  待审核期间禁止新预约。
+end note
+
+note right of Reserved
+  候补记录不改变商品状态，
+  也不占用商品锁定。
+end note
+
+note right of Sold
+  已成交不可撤销；
+  成交后自动停止在售。
+end note
+
+note bottom of Banned
+  违规处置优先限制展示和交易；
+  未经解除处罚并重新审核不得恢复发布。
+end note
+
+@enduml
