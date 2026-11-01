@@ -51,6 +51,11 @@ note right of Sold
   成交后自动停止在售。
 end note
 
+note right of Offline
+  下架或删除会终止未成交预约和候补，
+  但保留成交与审计历史。
+end note
+
 note bottom of Banned
   违规处置优先限制展示和交易；
   未经解除处罚并重新审核不得恢复发布。

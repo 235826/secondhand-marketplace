@@ -62,4 +62,23 @@ note over TS, DB
   任一方在成交前取消预约，则已有确认失效。
 end note
 
+== 阶段三：成交前取消 ==
+
+Buyer -> RS : 取消预约
+RS -> DB : UPDATE Reservation SET status = CANCELLED
+RS -> DB : UPDATE Product SET status = PUBLISHED\n[无其他有效锁定且商品可售]
+DB --> RS : 事务提交成功
+RS --> Buyer : 取消成功，释放锁定
+
+Seller -> RS : 取消预约
+RS -> DB : UPDATE Reservation SET status = CANCELLED
+RS -> DB : UPDATE Product SET status = PUBLISHED\n[无其他有效锁定且商品可售]
+DB --> RS : 事务提交成功
+RS --> Seller : 取消成功，释放锁定
+
+note over RS, DB
+  候补不会自动转正，须由卖家明确确认；
+  双方确认成交后禁止取消，成交不可撤销。
+end note
+
 @enduml

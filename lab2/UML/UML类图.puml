@@ -42,6 +42,7 @@ package "商品与审核" {
     - location: String
     - note: String
     - status: ProductStatus
+    + currentVersion(): ProductVersion
     + submitForReview(): void
     + publish(): void
     + takeOffline(): void
@@ -164,6 +165,7 @@ note right of Product
   ProductStatus: DRAFT / PENDING_REVIEW / REJECTED /
   PUBLISHED / RESERVED / OFFLINE / SOLD / VIOLATION_BANNED
   已成交不可撤销，成交后自动停止在售。
+  删除商品不抹除历史成交和日志关联。
 end note
 
 note right of Reservation

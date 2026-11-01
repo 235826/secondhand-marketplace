@@ -34,6 +34,7 @@ rectangle "预约与交易" {
 }
 
 rectangle "平台管理" {
+  usecase "查看全部商品" as UC22
   usecase "审核商品" as UC14
   usecase "删除 / 下架违规商品" as UC15
   usecase "冻结 / 封禁账户" as UC16
@@ -60,6 +61,7 @@ User --> UC12
 User --> UC13
 
 ' 管理员
+Admin --> UC22
 Admin --> UC14
 Admin --> UC15
 Admin --> UC16
