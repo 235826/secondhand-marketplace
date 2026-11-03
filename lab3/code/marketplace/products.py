@@ -81,6 +81,14 @@ class ProductService:
                 )
                 require(product["revision"] == revision, "商品已变化，请刷新")
                 require(
+                    not db.execute(
+                        "SELECT 1 FROM moderation_actions WHERE target_type='product' "
+                        "AND target_id=? AND active=1",
+                        (product_id,),
+                    ).fetchone(),
+                    "请先通过申诉解除违规处置，再重新送审",
+                )
+                require(
                     submit or product["status"] in {"DRAFT", "REJECTED", "OFFLINE"},
                     "公开或待审商品修改后须重新送审",
                 )
@@ -182,7 +190,7 @@ class ProductService:
                 status = "RESERVED" if locked else "PUBLISHED"
                 db.execute(
                     "UPDATE products SET approved_version_id=?,"
-                    "published_at=coalesce(published_at,?) WHERE id=?",
+                    "publication_blocked=0,published_at=coalesce(published_at,?) WHERE id=?",
                     (version_id, time.time(), product_id),
                 )
                 version = db.execute(
@@ -213,7 +221,11 @@ class ProductService:
             user = active_user(db, actor) if actor else None
             product = get_product(db, product_id)
             private = user and (user.is_admin or product["seller_id"] == actor)
-            public = product["status"] in PUBLIC_STATUSES and product["approved_version_id"]
+            public = (
+                product["status"] in PUBLIC_STATUSES
+                and product["approved_version_id"]
+                and not product["publication_blocked"]
+            )
             require(private or (public and not product["deleted_at"]), "商品不可查看", 404)
             return self._view(db, product, private)
 
@@ -267,6 +279,7 @@ class ProductService:
                 where.append("p.deleted_at IS NULL")
             if not private:
                 where.append("p.status IN ('PUBLISHED','RESERVED','OFFLINE','SOLD')")
+                where.append("p.publication_blocked=0")
             if filters.get("keyword"):
                 # instr 避免用户输入的 % 和 _ 意外成为通配符。
                 where.append(
@@ -278,11 +291,13 @@ class ProductService:
                     where.append(expression)
                     params.append(filters[field])
             lower = (
-                cents(filters["min_price"])
+                cents(filters["min_price"], allow_zero=True)
                 if filters.get("min_price") not in (None, "", "0")
                 else 0
             )
-            upper = cents(filters["max_price"]) if filters.get("max_price") else None
+            upper = (
+                cents(filters["max_price"], allow_zero=True) if filters.get("max_price") else None
+            )
             require(upper is None or lower <= upper, "价格下限不能大于上限", 400)
             where.append("v.price_cents>=?")
             params.append(lower)
@@ -308,6 +323,7 @@ class ProductService:
             visible = db.execute(
                 "SELECT v.image_keys FROM products p JOIN product_versions v "
                 "ON v.id=p.approved_version_id WHERE p.deleted_at IS NULL "
+                "AND p.publication_blocked=0 "
                 "AND p.status IN ('PUBLISHED','RESERVED','OFFLINE','SOLD')"
             )
             require(any(key in json.loads(row[0]) for row in visible), "图片不可查看", 404)

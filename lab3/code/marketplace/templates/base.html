@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}南大二手 · 校园闲置交易{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"></head>
+<body><header class="topbar"><div class="navwrap"><a class="brand" href="{{ url_for('index') }}"><span class="brandmark">N</span><span>南大二手<small>让闲置，再有价值</small></span></a>
+<nav aria-label="主导航"><a href="{{ url_for('index') }}">发现好物</a>{% if user %}{% if user.is_admin %}<a href="{{ url_for('admin') }}">管理工作台</a><a href="{{ url_for('logs') }}">操作日志</a>{% else %}<a href="{{ url_for('bookings') }}">我的预约</a><a href="{{ url_for('mine') }}">卖家中心</a><a href="{{ url_for('appeals') }}">投诉与申诉</a>{% endif %}{% else %}<a href="{{ url_for('auth',mode='appeal') }}">账户申诉</a>{% endif %}</nav>
+<div class="account">{% if user %}<span class="identity">{{ user.nickname }}<small>{{ labels[user.role] }}</small></span><form method="post" action="{{ url_for('auth',mode='logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="quiet">退出</button></form>{% else %}<a class="button" href="{{ url_for('auth',mode='login') }}">登录 / 注册</a>{% endif %}</div></div></header>
+<main>{% block content %}{% endblock %}</main><footer>南京大学校园闲置交易 · 线上预约，线下见面</footer></body></html>

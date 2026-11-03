@@ -93,11 +93,15 @@ def text(value, label, maximum=2000, required=True):
     return value
 
 
-def cents(value):
+def cents(value, allow_zero=False):
     try:
         number = Decimal(str(value))
         require(number.is_finite(), "价格必须为有限数值", 400)
-        require(0 < number <= Decimal("99999999.99"), "价格须大于零且不超过上限", 400)
+        require(
+            (number >= 0 if allow_zero else number > 0) and number <= Decimal("99999999.99"),
+            "价格须在允许范围内",
+            400,
+        )
         require(number * 100 == (number * 100).to_integral_value(), "价格最多两位小数", 400)
         return int(number * 100)
     except (InvalidOperation, ValueError, TypeError) as exc:

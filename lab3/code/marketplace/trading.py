@@ -19,6 +19,7 @@ class ReservationService:
             not product["deleted_at"] and product["status"] in {"PUBLISHED", "RESERVED"},
             "当前商品不可预约或候补",
         )
+        require(not product["publication_blocked"], "商品正受违规限制")
         active_user(db, product["seller_id"])
         return product
 

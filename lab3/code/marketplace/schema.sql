@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS products (
       ('DRAFT','PENDING_REVIEW','REJECTED','PUBLISHED','RESERVED','OFFLINE','SOLD','VIOLATION_BANNED')),
     current_version_id INTEGER REFERENCES product_versions(id),
     approved_version_id INTEGER REFERENCES product_versions(id),
-    revision INTEGER NOT NULL DEFAULT 1, published_at REAL, deleted_at REAL, created_at REAL NOT NULL
+    revision INTEGER NOT NULL DEFAULT 1, published_at REAL, deleted_at REAL,
+    publication_blocked INTEGER NOT NULL DEFAULT 0, created_at REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS product_versions (
     id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL REFERENCES products(id),

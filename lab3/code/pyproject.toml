@@ -3,7 +3,10 @@ name = "nju-marketplace"
 version = "0.1.0"
 description = "南京大学校园二手交易系统：软件工程实验三"
 requires-python = ">=3.13"
-dependencies = ["Flask", "Flask-WTF", "Pillow", "waitress"]
+dependencies = ["Flask", "Flask-WTF", "Pillow", "waitress", "cryptography"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "playwright"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

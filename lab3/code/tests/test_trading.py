@@ -1,59 +1,16 @@
-import io
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
 
 import pytest
 from conftest import register
-from PIL import Image
 
 from marketplace.domain import BusinessError
 from marketplace.products import ProductService
-from marketplace.trading import ReservationService, TransactionService
 
 
 def key():
     return uuid.uuid4().hex
-
-
-@pytest.fixture
-def market(system, tmp_path):
-    db, accounts, admin = system
-    seller = register(accounts, "seller")
-    buyer = register(accounts, "buyer")
-    other = register(accounts, "other")
-    products = ProductService(db, tmp_path / "images")
-    reservations = ReservationService(db)
-    trades = TransactionService(db)
-    buffer = io.BytesIO()
-    Image.new("RGB", (32, 32), "green").save(buffer, "PNG")
-    image = products.upload(seller, buffer.getvalue())
-    data = dict(
-        title="二手自行车",
-        description="校园通勤 Bicycle",
-        category_id=4,
-        price="100.00",
-        condition="九成新",
-        location="仙林校区",
-        note="当面验货",
-        image_keys=[image],
-    )
-    pid = products.save(seller, data, key(), submit=True)
-    pending = products.detail(pid, admin)
-    products.review(admin, pid, pending["current_version_id"], pending["revision"], True)
-    return dict(
-        db=db,
-        accounts=accounts,
-        admin=admin,
-        seller=seller,
-        buyer=buyer,
-        other=other,
-        products=products,
-        reservations=reservations,
-        trades=trades,
-        pid=pid,
-        data=data,
-    )
 
 
 def current(m):
@@ -219,3 +176,104 @@ def test_20_buyers_concurrently_get_exactly_one_lock_each_round(market):
         assert len(successful) == 1
         assert len(m["db"].rows("SELECT * FROM reservations WHERE status='LOCKED'")) == 1
         m["reservations"].cancel(*successful[0])
+
+
+def race_two(first, second):
+    barrier = Barrier(2)
+
+    def run(operation):
+        barrier.wait()
+        try:
+            return operation()
+        except BusinessError:
+            return "DENIED"
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        return list(pool.map(run, (first, second)))
+
+
+def test_concurrent_cancel_and_final_confirmation_never_resurrects(market):
+    m = market
+    rid = book(m)
+    m["reservations"].accept(m["seller"], rid)
+    revision = current(m)["revision"]
+    m["trades"].confirm(m["buyer"], rid, revision)
+    race_two(
+        lambda: m["trades"].confirm(m["seller"], rid, revision),
+        lambda: m["reservations"].cancel(m["buyer"], rid),
+    )
+    status = m["db"].one("SELECT status FROM reservations WHERE id=?", (rid,))["status"]
+    trades = m["db"].rows("SELECT * FROM transactions")
+    assert (status == "COMPLETED" and len(trades) == 1 and current(m)["status"] == "SOLD") or (
+        status == "CANCELLED" and not trades and current(m)["status"] == "PUBLISHED"
+    )
+
+
+def test_concurrent_promotion_and_new_buyer_have_one_lock(market):
+    m = market
+    rid = book(m)
+    wid = m["reservations"].join_waitlist(m["other"], m["pid"], current(m)["revision"])
+    m["reservations"].cancel(m["buyer"], rid)
+    revision = current(m)["revision"]
+    results = race_two(
+        lambda: m["reservations"].promote(m["seller"], wid, revision),
+        lambda: m["reservations"].reserve(m["buyer"], m["pid"], revision),
+    )
+    assert results.count("DENIED") == 1
+    assert (
+        len(
+            m["db"].rows("SELECT * FROM reservations WHERE status IN ('LOCKED','SELLER_CONFIRMED')")
+        )
+        == 1
+    )
+
+
+def test_concurrent_review_only_first_decision_wins(market):
+    m = market
+    p = current(m)
+    m["products"].save(m["seller"], m["data"], key(), m["pid"], p["revision"], True)
+    pending = current(m)
+    results = race_two(
+        lambda: m["products"].review(
+            m["admin"], m["pid"], pending["current_version_id"], pending["revision"], True
+        ),
+        lambda: m["products"].review(
+            m["admin"],
+            m["pid"],
+            pending["current_version_id"],
+            pending["revision"],
+            False,
+            "请补充信息",
+        ),
+    )
+    assert results.count("DENIED") == 1
+    assert (
+        len(
+            m["db"].rows(
+                "SELECT * FROM review_records WHERE version_id=?", (pending["current_version_id"],)
+            )
+        )
+        == 1
+    )
+
+
+def test_concurrent_reprice_and_final_confirmation_respects_version(market):
+    m = market
+    rid = book(m)
+    m["reservations"].accept(m["seller"], rid)
+    revision = current(m)["revision"]
+    m["trades"].confirm(m["buyer"], rid, revision)
+    results = race_two(
+        lambda: m["trades"].confirm(m["seller"], rid, revision),
+        lambda: m["products"].save(
+            m["seller"], m["data"] | {"price": "150"}, key(), m["pid"], revision, True
+        ),
+    )
+    assert results.count("DENIED") == 1
+    if current(m)["status"] == "SOLD":
+        assert m["db"].one("SELECT price_cents FROM transactions")["price_cents"] == 10000
+    else:
+        assert current(m)["status"] == "PENDING_REVIEW"
+        assert not m["db"].rows("SELECT * FROM transactions")
+        booking = m["db"].one("SELECT * FROM reservations WHERE id=?", (rid,))
+        assert booking["buyer_trade_confirmed_at"] is None
