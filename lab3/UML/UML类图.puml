@@ -1,0 +1,70 @@
+@startuml UML类图
+skinparam defaultFontName "PingFang SC"
+skinparam dpi 120
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide circle
+title 南京大学校园二手交易系统 - 实现类与服务依赖
+package "领域值" {
+  class User {
+    user_id: int
+    nickname: str
+    role: str
+    is_admin: bool
+  }
+  class Admin
+  class InitialAdmin
+  User <|-- Admin
+  Admin <|-- InitialAdmin
+  enum ProductStatus {
+    DRAFT / PENDING_REVIEW / REJECTED
+    PUBLISHED / RESERVED / OFFLINE
+    SOLD / VIOLATION_BANNED
+  }
+  class BusinessError
+}
+package "应用服务（Python 类）" {
+  class AccountService {
+    register() / login() / logout()
+    authenticate() / reset_password()
+    create_admin() / appeal_token()
+  }
+  class ProductService {
+    upload() / save() / review()
+    offline() / search() / detail()
+  }
+  class ReservationService {
+    reserve() / join_waitlist() / promote()
+    accept() / cancel() / accept_price()
+    message() / messages() / dashboard()
+  }
+  class TransactionService {
+    confirm()
+  }
+  ReservationService <|-- TransactionService
+  class ComplaintService {
+    complain() / resolve_complaint()
+    moderate_user() / moderate_product()
+    appeal() / resolve_appeal()
+  }
+  class AnalyticsLogService {
+    statistics() / logs()
+  }
+}
+package "仓储与基础设施" {
+  class Database {
+    initialize() / connect()
+    transaction() / rows() / one()
+  }
+  class EmailService {
+    send()
+  }
+}
+AccountService --> Database
+AccountService --> EmailService
+ProductService --> Database
+ReservationService --> Database
+ComplaintService --> Database
+AnalyticsLogService --> Database
+AccountService ..> User
+@enduml

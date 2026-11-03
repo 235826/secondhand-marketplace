@@ -1,0 +1,14 @@
+{
+  "branch": "lab3",
+  "remote": "https://github.com/235826/secondhand-marketplace.git",
+  "code_commit": "a5dbbe5e41dbbbb01993a8f5bc80afaad89d73fa",
+  "commits": [
+    "a5dbbe5 feat(lab3): add responsive web UI and moderation workflows",
+    "cd56048 feat(lab3): implement reviewed products and consistent trading",
+    "5ef984c feat(lab3): add persistence and secure account services",
+    "cd143b7 docs(lab3): add implementation and acceptance plan"
+  ],
+  "push_verified": true,
+  "verified_remote_commit": "a5dbbe5e41dbbbb01993a8f5bc80afaad89d73fa",
+  "verification_scope": "实现代码阶段提交的远程核对；报告及交付材料在后续独立提交中生成"
+}

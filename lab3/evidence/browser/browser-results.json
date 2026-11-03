@@ -1,0 +1,26 @@
+{
+  "checks": [
+    {
+      "viewport": [
+        1366,
+        768
+      ],
+      "flow": "登录→详情→预约→取消→再预约→卖家确认→留言→双方成交",
+      "passed": true
+    },
+    {
+      "viewport": [
+        375,
+        812
+      ],
+      "flow": "登录→详情→预约→取消→再预约→卖家确认→留言→双方成交",
+      "passed": true
+    },
+    {
+      "admin": "统计、商品管理、日志页面",
+      "passed": true
+    }
+  ],
+  "javascript_errors": [],
+  "passed": true
+}

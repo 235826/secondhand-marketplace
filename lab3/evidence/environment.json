@@ -1,0 +1,9 @@
+{
+  "os": "26.6.2",
+  "architecture": "arm64",
+  "cpu": "Apple M5",
+  "memory_bytes": 17179869184,
+  "python": "Python 3.13.3",
+  "tls": "Werkzeug 本机线程服务，临时自签名证书，127.0.0.1:5003；证书信任未验证",
+  "http": "Waitress 24 线程，仅监听回环地址"
+}

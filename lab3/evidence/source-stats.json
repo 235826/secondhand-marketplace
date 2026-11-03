@@ -1,0 +1,21 @@
+{
+  "definition": "Python 有效物理行，排除空白、注释及模块/类/函数文档字符串；SQL 多行字符串属于实现，计入其有效行；模板、样式、测试、脚本另列。",
+  "business_python": {
+    "marketplace/__init__.py": 20,
+    "marketplace/__main__.py": 52,
+    "marketplace/accounts.py": 187,
+    "marketplace/demo.py": 100,
+    "marketplace/domain.py": 83,
+    "marketplace/moderation.py": 204,
+    "marketplace/products.py": 309,
+    "marketplace/storage.py": 81,
+    "marketplace/trading.py": 283,
+    "marketplace/web.py": 348
+  },
+  "business_python_total": 1667,
+  "tests_python_total": 538,
+  "scripts_python_total": 286,
+  "sql_physical_lines": 106,
+  "template_files": 13,
+  "gui_generated_lines": 0
+}

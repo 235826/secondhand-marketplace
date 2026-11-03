@@ -1,0 +1,46 @@
+@startuml UML实体关系图
+skinparam defaultFontName "PingFang SC"
+skinparam dpi 120
+skinparam classAttributeIconSize 0
+hide circle
+title 领域实体与 SQLite 持久化关系
+package "持久化实体（SQLite 表，非同名 Python 类）" {
+  class Product <<table>> {
+    seller_id / status / revision
+    current_version_id / approved_version_id
+    publication_blocked / deleted_at
+  }
+  class ProductVersion <<table>> {
+    version_no / price_cents
+    immutable content / image_keys
+  }
+  class ReviewRecord <<table>>
+  class Category <<table>>
+  class Reservation <<table>> {
+    buyer_id / status / accepted_price
+    accepted_version_id / seller_accepted_at
+    buyer_trade_confirmed_at
+    seller_trade_confirmed_at
+    confirmation_version_id
+  }
+  class Waitlist <<table>>
+  class Transaction <<table>> {
+    UNIQUE product_id / reservation_id
+    price / category / version snapshot
+  }
+  class Complaint <<table>>
+  class ModerationAction <<table>>
+  class Appeal <<table>>
+  class ReservationMessage <<table>>
+  class OperationLog <<table>>
+  Product "1" -- "*" ProductVersion
+  ProductVersion "1" -- "0..1" ReviewRecord
+  Category "1" -- "*" ProductVersion
+  Product "1" -- "*" Reservation
+  Product "1" -- "*" Waitlist
+  Reservation "1" -- "0..1" Transaction
+  Reservation "1" -- "*" ReservationMessage
+  Product "1" -- "*" Complaint
+  ModerationAction "1" -- "*" Appeal
+}
+@enduml

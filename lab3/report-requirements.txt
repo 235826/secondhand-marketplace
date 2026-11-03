@@ -1,0 +1,4 @@
+# 仅生成及检查报告时使用；应用依赖另见 code/requirements.lock
+reportlab==5.1.0
+pypdf==6.21.4
+pymupdf==2.1

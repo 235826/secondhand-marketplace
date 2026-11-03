@@ -1,0 +1,55 @@
+{
+  "pages": 9,
+  "readable_text": true,
+  "identity_verified": true,
+  "pages_detail": [
+    {
+      "page": 1,
+      "characters": 718,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    },
+    {
+      "page": 2,
+      "characters": 589,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    },
+    {
+      "page": 3,
+      "characters": 823,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    },
+    {
+      "page": 4,
+      "characters": 448,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    },
+    {
+      "page": 5,
+      "characters": 291,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    },
+    {
+      "page": 6,
+      "characters": 788,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    },
+    {
+      "page": 7,
+      "characters": 705,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    },
+    {
+      "page": 8,
+      "characters": 819,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    },
+    {
+      "page": 9,
+      "characters": 965,
+      "first_line": "软件工程实验三 | 南京大学校园二手交易系统"
+    }
+  ],
+  "renderer": "PyMuPDF",
+  "text_verifier": "pypdf",
+  "visual_review": "已检查九页总览及图表/移动截图/Git展示页面，未发现截断、重叠或乱码"
+}

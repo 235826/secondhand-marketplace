@@ -1,0 +1,74 @@
+@startuml UML用例图
+skinparam defaultFontName "PingFang SC"
+skinparam dpi 150
+left to right direction
+title 南京大学校园二手交易系统 - 用例图
+
+actor "普通用户\n（买家 / 卖家）" as User
+actor "普通管理员" as Admin
+actor "初始管理员" as InitialAdmin
+
+rectangle "账户与权限" {
+  usecase "注册 / 登录" as UC01
+  usecase "管理个人账户" as UC02
+}
+
+rectangle "商品管理" {
+  usecase "发布 / 修改 / 送审" as UC03
+  usecase "下架 / 重新上架" as UC04
+}
+
+rectangle "查询与展示" {
+  usecase "查询与查看商品" as UC05
+}
+
+rectangle "预约与交易" {
+  usecase "预约商品" as UC06
+  usecase "加入候补" as UC07
+  usecase "取消预约" as UC08
+  usecase "确认预约与成交" as UC09
+}
+
+rectangle "平台管理" {
+  usecase "查看 / 审核 / 处置商品" as UC10
+  usecase "处置账户" as UC11
+  usecase "处理投诉 / 申诉" as UC12
+  usecase "统计与日志" as UC13
+  usecase "创建管理员" as UC14
+}
+
+' 普通用户
+User --> UC01
+User --> UC02
+User --> UC03
+User --> UC04
+User --> UC05
+User --> UC06
+User --> UC07
+User --> UC08
+User --> UC09
+
+' 管理员
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+Admin --> UC13
+
+' 初始管理员继承普通管理员权限，并独有创建管理员权限
+InitialAdmin --|> Admin
+InitialAdmin --> UC14
+
+' 用例关系
+UC07 .> UC06 : <<extend>>
+
+note right of User
+  同一普通账户可同时作为买家和卖家，
+  但不得预约自己发布的商品。
+end note
+
+note bottom of InitialAdmin
+  仅初始管理员可创建新管理员；
+  普通管理员不能创建管理员。
+end note
+
+@enduml

@@ -6,6 +6,8 @@
 
 在项目根目录执行，依赖已固定版本；首次安装需要网络。
 
+若使用提交 ZIP，先进入解压目录下的 `code/`，从下面的 `python3 -m venv .venv` 开始执行，无需再运行 `cd lab3/code`。
+
 ```sh
 cd lab3/code
 python3 -m venv .venv
