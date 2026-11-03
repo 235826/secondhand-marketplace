@@ -1,0 +1,17 @@
+[project]
+name = "nju-marketplace"
+version = "0.1.0"
+description = "南京大学校园二手交易系统：软件工程实验三"
+requires-python = ">=3.13"
+dependencies = ["Flask", "Flask-WTF", "Pillow", "waitress"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
