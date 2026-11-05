@@ -1,6 +1,6 @@
 {
   "archive": "实验3_241220131_单锦曼.zip",
-  "files": 49,
+  "files": 50,
   "zip_integrity": true,
   "excluded_runtime_and_secrets": true,
   "extracted_root": "/private/tmp/lab3-package-review/实验3_241220131_单锦曼",
@@ -11,5 +11,6 @@
     "dependency_environment": "复用已安装锁定依赖的 Python 虚拟环境，源码使用隔离解压目录"
   },
   "source_bytes_verified": true,
-  "sha256": "48948a249f643cd9912140cf98c4e143cabba7fde0038202450c128dc96dd3d8"
+  "sha256": "aa7ba3b2743a9a6334dae1401e8dd180e93e2fea9ef5f7f4e20a8dcb114dc9e4",
+  "one_command_start": true
 }

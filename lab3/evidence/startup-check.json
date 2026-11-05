@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-05",
+  "shell_syntax": "passed",
+  "root_command": "./start-lab3.sh",
+  "from_other_directory": true,
+  "custom_port": 5011,
+  "homepage_status": 200,
+  "test_service_stopped": true
+}
